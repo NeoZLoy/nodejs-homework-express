@@ -1,6 +1,7 @@
 const { getAllContacts } = require("../helpers/getContacts")
 
 const checkContactId = async (req, res, next) => {
+  try {
     const contacts = await getAllContacts();
     const contact = contacts.find(contact => contact.id === req.params.contactId);
 
@@ -9,9 +10,12 @@ const checkContactId = async (req, res, next) => {
             msg: 'Not found'
         })
     }
-
+    next()
     req.contact = contact;
+  } catch (error) {
+    next(error)
+  }
 }
 
 
-module.exports = {checkContactId}
+module.exports = {checkContactId, }

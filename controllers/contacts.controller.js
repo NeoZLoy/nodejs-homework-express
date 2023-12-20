@@ -24,7 +24,6 @@ const getContactById = async (req, res, next) => {
         const contacts = await getAllContacts()
         const { contactId } = req.params
         const searchedContact = contacts.find(contact => contact.id === contactId)
-
         res.status(200).json({
             msg: 'Success',
             contact: searchedContact,
@@ -34,14 +33,16 @@ const getContactById = async (req, res, next) => {
     }
 }
 
+
 const createContact = async (req, res, next) => {
     try { 
         const {value, error} = createContactValidator(req.body)
 
         if(error){
             res.status(400).json({
-                msg: 'missing required name field'
+            msg: error.details.map((detail) => detail.message),
             })
+            return
         }
 
         const {name, email, phone} = value
@@ -67,27 +68,23 @@ const createContact = async (req, res, next) => {
 }
 
 
-
-// Update Contact
-
 const updateContact = async (req, res, next) => {
  try {
-
-    const {value, error} = updateContactValidator(req.body)
-
-        if(error){
-            res.status(400).json({
-                msg: 'missing required name field'
-            })
-        }
-
     const contacts = await getAllContacts();
     const index = contacts.findIndex((item) => item.id === req.params.contactId);
     const contactToUpdate = contacts.find(contact => contact.id === req.params.contactId)
-
     if (index === -1) {
         return null;
       }
+    
+    const {value, error} = updateContactValidator(req.body);
+
+    if(error){
+        res.status(400).json({
+        msg: error.details.map((detail) => detail.message),
+        })
+        return
+    }
 
     contacts[index] = { ...contactToUpdate, ...value };
 
@@ -101,8 +98,6 @@ const updateContact = async (req, res, next) => {
     next(error)
  }
 }
-
-// Remove Contact
 
 const removeContact = async (req, res, next) => {
     try {
