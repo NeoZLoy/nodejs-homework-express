@@ -3,7 +3,7 @@ const path = require('node:path');
 const uuid = require('uuid')
 
 const {getAllContacts} = require('../helpers/getContacts');
-const { contactValidator } = require('../helpers/contactValidator');
+const { createContactValidator, updateContactValidator } = require('../helpers/contactValidator');
 
 const contactsPath = path.join(__dirname, '../db/contacts.json')
 const listContacts =  async (req, res, next) => {
@@ -36,7 +36,7 @@ const getContactById = async (req, res, next) => {
 
 const createContact = async (req, res, next) => {
     try { 
-        const {value, error} = contactValidator(req.body)
+        const {value, error} = createContactValidator(req.body)
 
         if(error){
             res.status(400).json({
@@ -72,6 +72,15 @@ const createContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
  try {
+
+    const {value, error} = updateContactValidator(req.body)
+
+        if(error){
+            res.status(400).json({
+                msg: 'missing required name field'
+            })
+        }
+
     const contacts = await getAllContacts();
     const index = contacts.findIndex((item) => item.id === req.params.contactId);
     const contactToUpdate = contacts.find(contact => contact.id === req.params.contactId)
@@ -80,7 +89,7 @@ const updateContact = async (req, res, next) => {
         return null;
       }
 
-    contacts[index] = { ...contactToUpdate, ...req.body };
+    contacts[index] = { ...contactToUpdate, ...value };
 
     fs.writeFile(contactsPath, JSON.stringify(contacts))
 

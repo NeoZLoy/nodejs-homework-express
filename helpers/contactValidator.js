@@ -1,6 +1,6 @@
 const Joi = require('joi')
 
-const contactValidator = (contactData) => {
+const createContactValidator = (contactData) => {
     Joi
         .object()
         .options({
@@ -13,4 +13,17 @@ const contactValidator = (contactData) => {
         }).validate(contactData)
 }
 
-module.exports = {contactValidator}
+const updateContactValidator = (contactData) => {
+    Joi
+    .object()
+    .options({
+        abortEarly: false
+    })
+    .keys({
+        name: Joi.string().optional().min(2),
+        mail:Joi.string().email(({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ua'] } })).optional(),
+        phone:Joi.string().min(6).max(10).optional()
+    }).validate(contactData)
+}
+
+module.exports = {createContactValidator, updateContactValidator}
