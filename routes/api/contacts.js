@@ -11,6 +11,6 @@ router.get('/:contactId', checkContactId ,getContactById);
 router.post('/', createContact);
 router.delete('/:contactId',checkContactId, removeContact);
 router.put('/:contactId',checkContactId, updateContact);
-router.patch('/:contactId', checkContactId, updateFavorite )
+router.patch('/:contactId/favorite', checkContactId, updateFavorite )
 
 module.exports = router;
