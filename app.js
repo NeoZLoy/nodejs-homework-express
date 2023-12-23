@@ -1,6 +1,9 @@
 const express = require('express')
 const logger = require('morgan')
 const cors = require('cors')
+const mongoose = require('mongoose');
+require('dotenv').config();
+
 
 const contactsRouter = require('./routes/api/contacts')
 
@@ -22,4 +25,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message })
 })
 
-module.exports = app
+const PORT = process.env.PORT || 3001;
+const urlDb = process.env.DB_HOST;
+
+mongoose.connect(urlDb,)
+  .then(() => {
+    app.listen(PORT, function () {
+      console.log(`Server running. Use our API on port: ${PORT}`);
+    });
+  })
+  .catch((err) =>
+    console.log(`Server not running. Error message: ${err.message}`)
+  );
