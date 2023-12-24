@@ -1,11 +1,8 @@
 const express = require('express')
 const logger = require('morgan')
 const cors = require('cors')
-<<<<<<< Updated upstream
-=======
-const mongoose = require('mongoose');
+
 require('dotenv').config();
->>>>>>> Stashed changes
 
 const contactsRouter = require('./routes/api/contacts')
 const userRouter = require('./routes/api/users')
