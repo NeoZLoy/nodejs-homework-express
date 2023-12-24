@@ -1,5 +1,10 @@
+const bcrypt = require('bcrypt');
+
 const { createUserValidation } = require("../helpers/user.validator");
 const { createUser } = require("../services");
+
+const saltRounds = 10;
+
 
 const registrateUser = async (req, res, next) => {
     try {
@@ -10,6 +15,9 @@ const registrateUser = async (req, res, next) => {
                 msg: error.details.map((detail) => detail.message)
             })
         }
+
+        const pwd = value.password; 
+        
 
         const result = await createUser({...value});
 
