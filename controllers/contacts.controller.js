@@ -2,8 +2,12 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const uuid = require('uuid')
 
+<<<<<<< Updated upstream
 const {getAllContacts} = require('../helpers/getContacts');
 const { createContactValidator, updateContactValidator } = require('../helpers/contactValidator');
+=======
+const { createContactValidator, updateContactValidator } = require('../helpers/contact.validator');
+>>>>>>> Stashed changes
 
 const contactsPath = path.join(__dirname, '../db/contacts.json')
 const listContacts =  async (req, res, next) => {
