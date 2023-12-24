@@ -1,15 +1,10 @@
-const fs = require('node:fs/promises');
-const path = require('node:path');
-const uuid = require('uuid')
+const service = require('../services/index')
 
-const {getAllContacts} = require('../helpers/getContacts');
 const { createContactValidator, updateContactValidator } = require('../helpers/contactValidator');
 
-const contactsPath = path.join(__dirname, '../db/contacts.json')
 const listContacts =  async (req, res, next) => {
 try {
-    const contacts = await getAllContacts()
-    console.log(res.status)
+    const contacts = await service.getAllContacts();
     res.status(200).json({
         msg: 'Success',
         contacts: contacts,
@@ -21,9 +16,7 @@ try {
 
 const getContactById = async (req, res, next) => {
     try {
-        const contacts = await getAllContacts()
-        const { contactId } = req.params
-        const searchedContact = contacts.find(contact => contact.id === contactId)
+        const searchedContact = await service.getContactById(req.params.contactId)
         res.status(200).json({
             msg: 'Success',
             contact: searchedContact,
@@ -45,21 +38,10 @@ const createContact = async (req, res, next) => {
             return
         }
 
-        const {name, email, phone} = value
-
-        const newContact = {
-            id: uuid.v4(),
-            name,
-            phone,
-            email,
-        }
-        const contacts = await getAllContacts()
-
-        contacts.push(newContact);
-        await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+        const result = await service.createContact({...value})
         res.status(201).json({
             msg: 'Contact created',
-            contact: newContact,
+            contact: result,
         })
 
     } catch (error) {
@@ -70,50 +52,64 @@ const createContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
  try {
-    const contacts = await getAllContacts();
-    const index = contacts.findIndex((item) => item.id === req.params.contactId);
-    const contactToUpdate = contacts.find(contact => contact.id === req.params.contactId)
-    if (index === -1) {
-        return null;
-      }
-    
+        
+    console.log(req.body)
+    const { contactId } = req.params
+       
     const {value, error} = updateContactValidator(req.body);
-
+    
     if(error){
         res.status(400).json({
         msg: error.details.map((detail) => detail.message),
         })
         return
     }
-
-    contacts[index] = { ...contactToUpdate, ...value };
-
-    fs.writeFile(contactsPath, JSON.stringify(contacts))
+    console.log(value)
+    const result = await service.updateContact(contactId, {...value})
 
     res.status(201).json({
         msg: 'Contact updated',
-        contact: contacts[index],
+        contact: result,
     })
  } catch (error) {
     next(error)
  }
 }
 
+const updateFavorite = async (req, res, next) => {
+    try {
+        const { contactId } = req.params
+        console.log(req.body)
+        const { favorite = false } = req.body
+
+        if(!req.body){
+            res.status(400).json({
+                msg: 'Missing field favorite'
+            })
+        }
+
+        const result = await service.updateContact(contactId, {favorite});
+        res.status(200).json({
+            msg: 'Contact updated',
+            contact: result,
+        })
+    } catch (error) {
+        
+    }
+}
+
 const removeContact = async (req, res, next) => {
     try {
-        const contacts = await getAllContacts();
-        const contactToRemove = contacts.find(contact => contact.id === req.params.contactId)
-        const updatedContactList = contacts.filter(contact => contact.id !== contactToRemove.id)
-
-        await fs.writeFile(contactsPath, JSON.stringify(updatedContactList))
+        const { contactId } = req.params;
+        const result = await service.removeContact(contactId)
 
         res.status(200).json({
             msg: 'Contact removed',
-            contact: contactToRemove,
+            contact: result,
         })
     } catch (error) {
         next(error)
     }
 }
 
-module.exports = {contactsPath, listContacts, getContactById, createContact, updateContact, removeContact }
+module.exports = {updateFavorite, listContacts, getContactById, createContact, updateContact, removeContact }
