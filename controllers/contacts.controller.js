@@ -3,7 +3,19 @@ const { createContactValidator, updateContactValidator } = require('../helpers/c
 
 const listContacts =  async (req, res, next) => {
 try {
-    const contacts = await service.getAllContacts();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const favorites = req.query.favorites === "true";
+    console.table(favorites)
+    if(favorites){
+        const favContacts = await service.getFavoriteContacts();
+        return res.status(200).json({
+            msg: "Success",
+            contacts: favContacts
+        })
+
+    }
+    const contacts = await service.getAllContacts(page, limit);
     res.status(200).json({
         msg: 'Success',
         contacts: contacts,

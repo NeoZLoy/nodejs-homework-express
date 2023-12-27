@@ -3,11 +3,8 @@ const jwt = require('jsonwebtoken');
 
 
 const { createUserValidation } = require("../helpers/user.validator");
-const { createUser, findByEmail, findUserById  } = require("../services");
+const { createUser, findByEmail, findUserById, findUserByToken  } = require("../services");
 const { hashPwd } = require('../helpers/user.hash');
-// const { findById } = require('../services/schemas/user.schema');
-// const {User} = require('../services/schemas/user.schema');
-
 
 const registrateUser = async (req, res, next) => {
     try {
@@ -86,4 +83,50 @@ const logout = async (req, res, next) => {
 }
 
 
-module.exports = {registrateUser, login, logout}
+//  TODO доделать!!!
+const getCurrentUser = async (req, res, next) => {
+    try {
+        const user = await findUserByToken(req.headers.authorization)
+        console.log(req.headers.authorization)
+        if(!user){
+            return res.status(401).json({
+                msg: "Not authorized"
+            })
+        }
+
+        return res.status(200).json({
+            user: {email: user.email, subscription: user.subscription}
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+// TODO Разобраться с поиском юзера
+const updateSubscription = async (req, res, next) => {
+    try {
+        const user = await findUserByToken(req.headers.token)
+        const subTypes = ['starter', 'pro', 'business']
+        if(subTypes.includes(req.body.subscription)){
+            user.subscription = req.body.subscription;
+            console.table(user)
+            console.log(req.body.subscription)
+            user.save()
+            return res.status(201).json({
+                msg: "subscription updated!",
+                user: {email: user.email, subscription: user.subscription}
+            })
+        } else {
+            return res.status(400).json({
+                msg: "Bad request"
+            })
+        }
+        
+    } catch (error) {
+       next(error) 
+    }
+}
+
+
+module.exports = {registrateUser, login, logout, getCurrentUser, updateSubscription}
