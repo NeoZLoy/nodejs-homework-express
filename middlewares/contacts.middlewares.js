@@ -1,4 +1,4 @@
-const { getAllContacts } = require("../helpers/getContacts")
+const { getAllContacts } = require("../services")
 
 const checkContactId = async (req, res, next) => {
   try {

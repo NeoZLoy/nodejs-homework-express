@@ -32,4 +32,8 @@ const getContactById = async (id) => {
     return await User.create(userData)
   }
 
-  module.exports = {getAllContacts, getContactById, createContact, updateContact, removeContact, getUsers, createUser}
+  const loginUser = async (userData) => {
+    return await User.findOne({email:userData.email})
+  }
+
+  module.exports = {getAllContacts, getContactById, createContact, updateContact, removeContact, getUsers, createUser, loginUser}
