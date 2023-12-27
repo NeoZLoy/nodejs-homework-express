@@ -1,4 +1,8 @@
-const {getUsers} = require('../services')
+const jwt = require('jsonwebtoken');
+
+
+const {getUsers } = require('../services');
+const { findUserById } = require('../services');
 
 const checkUniqueEmail = async (req, res, next) => {
     try {
@@ -12,16 +16,51 @@ const checkUniqueEmail = async (req, res, next) => {
         }
 
         next()
-       
         
     } catch (error) {
         next(error)
     }
 }
 
-// const checkUser = async (req, res, next) => {
-//     const users = await getUsers();
-//     const loginUser = users.find(user => user.)
-// }
+const checkToken = async (req, res, next) => {
 
-module.exports = {checkUniqueEmail};
+    // get token from header
+    const tokenToCheck = req.headers.authorization;
+
+    // token validation
+    if (tokenToCheck) {
+        const [authType, authToken] = tokenToCheck.split(' ');
+        if (authType === 'Bearer') {
+            req.token = authToken;
+          } else{
+            return res.status(401).json({
+                msg: "Not authorized"
+            })
+          }
+
+        // token decode to get id
+        const decoded = await new Promise((resolve, reject) => {
+            jwt.verify(authToken, process.env.key, (err, decoded) => {
+                if (err) reject(err);
+                else resolve(decoded);
+            });
+        });
+        const user = await findUserById(decoded.id);
+
+        // is token === user.token
+        if (!user || user.token !== authToken){
+            return res.status(401).json({
+                msg: "Not authorized"
+            })
+        }
+
+        req.user = user;
+        next()
+
+      } else {
+        return res.status(401).json({
+            msg: "Token not provided"
+        });
+    }
+}
+module.exports = {checkUniqueEmail, checkToken};

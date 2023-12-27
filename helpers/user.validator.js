@@ -8,8 +8,19 @@ const createUserValidation = (userData) => {
     })
     .keys({
         email:Joi.string().email(({ minDomainSegments: 1, tlds: { allow: ['com', 'net', 'ua'] } })).required(),
-        password: Joi.string().required()
+        password: Joi.string().required().min(6),
     }).validate(userData)
 }
 
-module.exports = {createUserValidation}
+const loginUserValidation = (userData) => {
+    return Joi
+    .object()
+    .keys({
+        email:Joi.string().email(({ minDomainSegments: 1, tlds: { allow: ['com', 'net', 'ua'] } })).required(),
+    }).options({
+        abortEarly: false,
+    }).validate(userData)
+}
+
+
+module.exports = {createUserValidation, loginUserValidation}

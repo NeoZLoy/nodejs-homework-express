@@ -63,7 +63,6 @@ const updateContact = async (req, res, next) => {
         })
         return
     }
-    console.log(value)
     const result = await service.updateContact(contactId, {...value})
 
     res.status(201).json({
@@ -78,7 +77,6 @@ const updateContact = async (req, res, next) => {
 const updateFavorite = async (req, res, next) => {
     try {
         const { contactId } = req.params
-        console.log(req.body)
         const { favorite = false } = req.body
 
         if(!req.body){
