@@ -18,5 +18,22 @@ const checkContactId = async (req, res, next) => {
   }
 }
 
+const checkOwner = async (req, res, next) => {
+  try {
+    const {contactId} = req.params
 
-module.exports = {checkContactId, }
+    if(contactId !== req.id){
+      res.status(401).json({
+          msg: "Not autorized!"
+      })
+  }
+
+  next()
+
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+module.exports = {checkContactId, checkOwner }

@@ -46,6 +46,7 @@ const checkToken = async (req, res, next) => {
             });
         });
         const user = await findUserById(decoded.id);
+        req.id = decoded.id;
 
         // is token === user.token
         if (!user || user.token !== authToken){

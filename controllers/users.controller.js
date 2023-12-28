@@ -64,7 +64,7 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        const user = await findUserById(req.body.id);
+        const user = await findUserById(req.id);
 
         if(!user){
             res.status(401).json({
@@ -73,8 +73,9 @@ const logout = async (req, res, next) => {
         }
 
         user.token = null;
+        await user.save()
 
-        return res.status(204);
+        return res.status(204).send();
 
     } catch (error) {
         next(error)
@@ -106,7 +107,7 @@ const updateSubscription = async (req, res, next) => {
         const subTypes = ['starter', 'pro', 'business']
         if(subTypes.includes(req.body.subscription)){
             user.subscription = req.body.subscription;
-            user.save()
+            await user.save()
             return res.status(201).json({
                 msg: "subscription updated!",
                 user: {email: user.email, subscription: user.subscription}

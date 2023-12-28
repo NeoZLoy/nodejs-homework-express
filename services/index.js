@@ -2,10 +2,10 @@
 const Contact = require('./schemas/contact.schema')
 const User = require('./schemas/user.schema')
 
-const getAllContacts = async (page, limit) => {
+const getAllContacts = async (page, limit, owner) => {
   try {
     const skip = (page - 1) * limit
-    return await Contact.find().skip(skip).limit(limit)
+    return await Contact.find().skip(skip).limit(limit).where({owner: owner})
 
   } catch (error) {
     throw new Error(`Error fetching contacts: ${error.message}`);

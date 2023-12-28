@@ -14,7 +14,7 @@ try {
         })
 
     }
-    const contacts = await service.getAllContacts(page, limit);
+    const contacts = await service.getAllContacts(page, limit, req.id);
 
     res.status(200).json({
         msg: 'Success',
@@ -28,10 +28,12 @@ try {
 const getContactById = async (req, res, next) => {
     try {
         const searchedContact = await service.getContactById(req.params.contactId)
+        
         res.status(200).json({
             msg: 'Success',
             contact: searchedContact,
         })
+      
     } catch (error) {
         next(error)
     }
@@ -49,7 +51,7 @@ const createContact = async (req, res, next) => {
             return
         }
 
-        const result = await service.createContact({...value})
+        const result = await service.createContact({...value, owner: req.id})
         res.status(201).json({
             msg: 'Contact created',
             contact: result,
@@ -63,8 +65,7 @@ const createContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
  try {
-    const { contactId } = req.params
-       
+    const { contactId } = req.params       
     const {value, error} = updateContactValidator(req.body);
     
     if(error){
