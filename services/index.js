@@ -1,3 +1,4 @@
+
 const Contact = require('./schemas/contact.schema')
 const User = require('./schemas/user.schema')
 
@@ -9,16 +10,18 @@ const getAllContacts = async (page, limit) => {
   } catch (error) {
     throw new Error(`Error fetching contacts: ${error.message}`);
   }
+
 }
 
 const getContactById = async (id) => {
     return await Contact.findOne({ _id: id })
   }
 
+
 const getFavoriteContacts = async() => {
   return await Contact.find().where({favorite: true})
 }
-  
+ 
   const createContact = async (contactData) => {
     return await Contact.create(contactData)
   }
@@ -30,7 +33,6 @@ const getFavoriteContacts = async() => {
   const removeContact = async (id) => {
     return await Contact.findByIdAndDelete({ _id: id })
   }
-
 
 // ********************** USERS **************************
 

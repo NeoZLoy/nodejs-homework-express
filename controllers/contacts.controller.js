@@ -15,6 +15,7 @@ try {
 
     }
     const contacts = await service.getAllContacts(page, limit);
+
     res.status(200).json({
         msg: 'Success',
         contacts: contacts,
@@ -119,3 +120,4 @@ const removeContact = async (req, res, next) => {
 }
 
 module.exports = {updateFavorite, listContacts, getContactById, createContact, updateContact, removeContact }
+

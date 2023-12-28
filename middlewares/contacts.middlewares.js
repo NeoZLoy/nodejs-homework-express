@@ -1,9 +1,10 @@
-const { getAllContacts } = require("../services")
+
+const service = require('../services/index.js')
 
 const checkContactId = async (req, res, next) => {
   try {
-    const contacts = await getAllContacts();
-    const contact = contacts.find(contact => contact.id === req.params.contactId);
+    const { contactId } = req.params
+    const contact = await service.getContactById(contactId)
 
     if(!contact){
         res.status(404).json({
