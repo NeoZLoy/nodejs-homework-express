@@ -1,4 +1,6 @@
 const Joi = require('joi')
+
+
 const createContactValidator = (contactData) => {
     return Joi
         .object()

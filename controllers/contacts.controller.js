@@ -1,10 +1,21 @@
 const service = require('../services/index')
-
-const { createContactValidator, updateContactValidator } = require('../helpers/contactValidator');
+const { createContactValidator, updateContactValidator } = require('../helpers/contact.validator');
 
 const listContacts =  async (req, res, next) => {
 try {
-    const contacts = await service.getAllContacts();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const favorites = req.query.favorites === "true";
+    if(favorites){
+        const favContacts = await service.getFavoriteContacts();
+        return res.status(200).json({
+            msg: "Success",
+            contacts: favContacts
+        })
+
+    }
+    const contacts = await service.getAllContacts(page, limit);
+
     res.status(200).json({
         msg: 'Success',
         contacts: contacts,
@@ -52,8 +63,6 @@ const createContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
  try {
-        
-    console.log(req.body)
     const { contactId } = req.params
        
     const {value, error} = updateContactValidator(req.body);
@@ -64,7 +73,6 @@ const updateContact = async (req, res, next) => {
         })
         return
     }
-    console.log(value)
     const result = await service.updateContact(contactId, {...value})
 
     res.status(201).json({
@@ -79,7 +87,6 @@ const updateContact = async (req, res, next) => {
 const updateFavorite = async (req, res, next) => {
     try {
         const { contactId } = req.params
-        console.log(req.body)
         const { favorite = false } = req.body
 
         if(!req.body){
@@ -113,3 +120,4 @@ const removeContact = async (req, res, next) => {
 }
 
 module.exports = {updateFavorite, listContacts, getContactById, createContact, updateContact, removeContact }
+
