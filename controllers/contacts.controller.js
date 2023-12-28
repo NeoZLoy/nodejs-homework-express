@@ -6,7 +6,6 @@ try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const favorites = req.query.favorites === "true";
-    console.table(favorites)
     if(favorites){
         const favContacts = await service.getFavoriteContacts();
         return res.status(200).json({
@@ -63,8 +62,6 @@ const createContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
  try {
-        
-    console.log(req.body)
     const { contactId } = req.params
        
     const {value, error} = updateContactValidator(req.body);

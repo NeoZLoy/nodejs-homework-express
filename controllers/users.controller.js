@@ -51,7 +51,6 @@ const login = async (req, res, next) => {
         const key = process.env.key;
         const token = jwt.sign({email: user.email, id: user.id} , key, { expiresIn: '1h' });
         user.token = token;
-        console.log(`LOGIN TOKEN: ${token}`)
         await user.save()
             return res.status(201).json({
             msg: '++',
@@ -83,11 +82,9 @@ const logout = async (req, res, next) => {
 }
 
 
-//  TODO доделать!!!
 const getCurrentUser = async (req, res, next) => {
     try {
-        const user = await findUserByToken(req.headers.authorization)
-        console.log(req.headers.authorization)
+        const user = await findUserByToken(req.token)
         if(!user){
             return res.status(401).json({
                 msg: "Not authorized"
@@ -103,15 +100,12 @@ const getCurrentUser = async (req, res, next) => {
 }
 
 
-// TODO Разобраться с поиском юзера
 const updateSubscription = async (req, res, next) => {
     try {
-        const user = await findUserByToken(req.headers.token)
+        const user = await findUserByToken(req.token)
         const subTypes = ['starter', 'pro', 'business']
         if(subTypes.includes(req.body.subscription)){
             user.subscription = req.body.subscription;
-            console.table(user)
-            console.log(req.body.subscription)
             user.save()
             return res.status(201).json({
                 msg: "subscription updated!",

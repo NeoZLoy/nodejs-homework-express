@@ -51,8 +51,7 @@ const getFavoriteContacts = async() => {
   }
 
   const findUserByToken = async (userData) => {
-    const [authType, authToken] = userData.split(' ');
-    return await User.findOne({token: authToken})
+    return await User.findOne({token: userData})
   }
   
 
