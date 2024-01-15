@@ -24,7 +24,7 @@ const registrateUser = async (req, res, next) => {
         const hashedPassword = await hashPwd(req.body.password)
 
         // creating new user
-        const result = await createUser({...value, password: hashedPassword, avatar: avatarUrl});
+        const result = await createUser({...value, password: hashedPassword, avatarUrl: avatarUrl});
 
 
         return res.status(201).json({
@@ -107,10 +107,9 @@ const getCurrentUser = async (req, res, next) => {
 }
 
 
-const updateUserByMyself = async (req, res, next) => {
+const updateSubscription = async (req, res, next) => {
     try {
         const user = await findUserByToken(req.token)
-        // Update subscription
         const subTypes = ['starter', 'pro', 'business']
         if(subTypes.includes(req.body.subscription)){
             user.subscription = req.body.subscription;
@@ -130,5 +129,21 @@ const updateUserByMyself = async (req, res, next) => {
     }
 }
 
+const updateUserAvatar = async(req, res, next) => {
+    try {
+       if(req.file){
+        const user = await findUserByToken(req.token)
+        console.log(req.file)
+        user.avatarUrl = req.file.path.replace('public', '')
+        user.save()
+        res.status(200).json({
+            "msg": "Avatar updated!"
+        })
+       }
 
-module.exports = {registrateUser, login, logout, getCurrentUser, updateUserByMyself}
+    } catch (error) {
+        next(error)
+    }
+}
+
+module.exports = {registrateUser, login, logout, getCurrentUser, updateSubscription, updateUserAvatar}

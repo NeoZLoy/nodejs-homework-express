@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const multer = require('multer')
+const uuid = require('uuid').v4
 
 
 const {getUsers } = require('../services');
@@ -64,4 +66,32 @@ const checkToken = async (req, res, next) => {
         });
     }
 }
-module.exports = {checkUniqueEmail, checkToken};
+
+// Multer Storage
+
+const multerStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/avatars')
+    },
+    filename: (req, file, cb) => {
+        const extension = file.mimetype.split('/')[1];
+        cb(null, `${req.user.id}-${uuid()}.${extension}`)
+    }
+})
+
+// Multer filter
+
+const multerFilter = (req, file, cb) => {
+    if(file.mimetype.startsWith('image')){
+        cb(null, true)
+    }else{
+        cb(new Error(400, 'Only images is allowed'), false)
+    }
+}
+
+const uploadUserAvatar = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter,
+}).single('avatar')
+
+module.exports = {checkUniqueEmail, checkToken, uploadUserAvatar};
