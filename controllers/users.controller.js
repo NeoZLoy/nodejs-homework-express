@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto')
 
 
 const { createUserValidation } = require("../helpers/user.validator");
@@ -15,11 +16,16 @@ const registrateUser = async (req, res, next) => {
                 msg: error.details.map((detail) => detail.message)
             })
         }
+        // generate avatar
+        const emailHash = crypto.createHash('md5').update(value.email).digest('hex');
+        const avatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=wavatar`
 
-        const hashed = await hashPwd(req.body.password)
-        
+        // hashing password
+        const hashedPassword = await hashPwd(req.body.password)
 
-        const result = await createUser({...value, password: hashed});
+        // creating new user
+        const result = await createUser({...value, password: hashedPassword, avatar: avatarUrl});
+
 
         return res.status(201).json({
             msg: 'Registration succesfull',
@@ -101,15 +107,16 @@ const getCurrentUser = async (req, res, next) => {
 }
 
 
-const updateSubscription = async (req, res, next) => {
+const updateUserByMyself = async (req, res, next) => {
     try {
         const user = await findUserByToken(req.token)
+        // Update subscription
         const subTypes = ['starter', 'pro', 'business']
         if(subTypes.includes(req.body.subscription)){
             user.subscription = req.body.subscription;
             await user.save()
             return res.status(201).json({
-                msg: "subscription updated!",
+                msg: "User updated!",
                 user: {email: user.email, subscription: user.subscription}
             })
         } else {
@@ -124,4 +131,4 @@ const updateSubscription = async (req, res, next) => {
 }
 
 
-module.exports = {registrateUser, login, logout, getCurrentUser, updateSubscription}
+module.exports = {registrateUser, login, logout, getCurrentUser, updateUserByMyself}

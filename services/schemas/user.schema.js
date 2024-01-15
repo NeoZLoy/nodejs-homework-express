@@ -21,6 +21,9 @@ const user = new Schema({
       type: String,
       default: null,
     },
+    avatar: {
+      type: String,
+    }
   })
 
   const User = mongoose.model('user', user);
