@@ -24,7 +24,7 @@ const registrateUser = async (req, res, next) => {
         const hashedPassword = await hashPwd(req.body.password)
 
         // creating new user
-        const result = await createUser({...value, password: hashedPassword, avatarUrl: avatarUrl});
+        const result = await createUser({...value, password: hashedPassword, avatar: avatarUrl});
 
 
         return res.status(201).json({
