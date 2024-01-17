@@ -58,9 +58,10 @@ const login = async (req, res, next) => {
         const token = jwt.sign({email: user.email, id: user.id} , key, { expiresIn: '1h' });
         user.token = token;
         await user.save()
-            return res.status(201).json({
+            return res.status(200).json({
             msg: '++',
-            res: {token, user: {email: user.email, subscription: user.subscription}}
+            res: {token, user: {email: user.email, subscription: user.subscription}},
+            
         })
         
     } catch (error) {
