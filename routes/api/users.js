@@ -1,6 +1,6 @@
 const express = require('express');
 
-const {checkUniqueEmail, checkToken, uploadUserAvatar} = require('../../middlewares/user.middlewares');
+const {checkUniqueEmail, checkToken, uploadUserAvatar, resizeUserAvatar, saveUserAvatar} = require('../../middlewares/user.middlewares');
 const { registrateUser, login, logout, getCurrentUser, updateSubscription, updateUserAvatar } = require('../../controllers/users.controller');
 
 const userRouter = express.Router();
@@ -10,7 +10,7 @@ userRouter.post('/login', login);
 userRouter.post('/logout', checkToken, logout);
 userRouter.get('/current', checkToken, getCurrentUser);
 userRouter.patch('/', checkToken, updateSubscription);
-userRouter.patch('/avatars', checkToken, uploadUserAvatar, updateUserAvatar)
+userRouter.patch('/avatars', checkToken, uploadUserAvatar, resizeUserAvatar, saveUserAvatar, updateUserAvatar)
 
 
 module.exports = userRouter;

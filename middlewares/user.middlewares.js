@@ -1,10 +1,13 @@
 const jwt = require('jsonwebtoken');
 const multer = require('multer')
 const uuid = require('uuid').v4
+const jimp = require("jimp");
+const path = require('path')
 
 
 const {getUsers } = require('../services');
 const { findUserById } = require('../services');
+
 
 const checkUniqueEmail = async (req, res, next) => {
     try {
@@ -69,15 +72,7 @@ const checkToken = async (req, res, next) => {
 
 // Multer Storage
 
-const multerStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/avatars')
-    },
-    filename: (req, file, cb) => {
-        const extension = file.mimetype.split('/')[1];
-        cb(null, `${req.user.id}-${uuid()}.${extension}`)
-    }
-})
+const multerStorage = multer.memoryStorage()
 
 // Multer filter
 
@@ -94,4 +89,36 @@ const uploadUserAvatar = multer({
     fileFilter: multerFilter,
 }).single('avatar')
 
-module.exports = {checkUniqueEmail, checkToken, uploadUserAvatar};
+const resizeUserAvatar = async (req, res, next) => {
+
+    if(!req.file){
+        next()
+    }
+
+    try {
+        const avatar = await jimp.read(req.file.buffer);
+        await avatar.resize(200, 200); // Adjust dimensions as needed
+        await avatar.quality(90);
+        req.file.buffer = await avatar.getBufferAsync(jimp.MIME_JPEG);
+        next();
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+const saveUserAvatar = async (req, res, next) => {
+
+    try {
+        const filename = `${req.user.id}-${uuid()}.jpg`; // Adjust the filename as needed
+        const filePath = path.join('public/avatars', filename);
+        const avatar = await jimp.read(req.file.buffer);
+        await avatar.writeAsync(filePath);
+        req.file.path = filePath;
+        next()
+    } catch (error) {
+        next(error)
+    }
+
+}
+module.exports = {checkUniqueEmail, checkToken, uploadUserAvatar, resizeUserAvatar, saveUserAvatar};
