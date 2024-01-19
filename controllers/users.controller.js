@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto')
 
 
 const { createUserValidation } = require("../helpers/user.validator");
@@ -15,11 +16,16 @@ const registrateUser = async (req, res, next) => {
                 msg: error.details.map((detail) => detail.message)
             })
         }
+        // generate avatar
+        const emailHash = crypto.createHash('md5').update(value.email).digest('hex');
+        const avatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=wavatar`
 
-        const hashed = await hashPwd(req.body.password)
-        
+        // hashing password
+        const hashedPassword = await hashPwd(req.body.password)
 
-        const result = await createUser({...value, password: hashed});
+        // creating new user
+        const result = await createUser({...value, password: hashedPassword, avatar: avatarUrl});
+
 
         return res.status(201).json({
             msg: 'Registration succesfull',
@@ -52,9 +58,10 @@ const login = async (req, res, next) => {
         const token = jwt.sign({email: user.email, id: user.id} , key, { expiresIn: '1h' });
         user.token = token;
         await user.save()
-            return res.status(201).json({
+            return res.status(200).json({
             msg: '++',
-            res: {token, user: {email: user.email, subscription: user.subscription}}
+            res: {token, user: {email: user.email, subscription: user.subscription}},
+            
         })
         
     } catch (error) {
@@ -109,7 +116,7 @@ const updateSubscription = async (req, res, next) => {
             user.subscription = req.body.subscription;
             await user.save()
             return res.status(201).json({
-                msg: "subscription updated!",
+                msg: "User updated!",
                 user: {email: user.email, subscription: user.subscription}
             })
         } else {
@@ -123,5 +130,21 @@ const updateSubscription = async (req, res, next) => {
     }
 }
 
+const updateUserAvatar = async(req, res, next) => {
+    try {
+       if(req.file){
+        const user = await findUserByToken(req.token)
+        console.log(req.file)
+        user.avatarUrl = req.file.path.replace('public', '')
+        user.save()
+        res.status(200).json({
+            "msg": "Avatar updated!"
+        })
+       }
 
-module.exports = {registrateUser, login, logout, getCurrentUser, updateSubscription}
+    } catch (error) {
+        next(error)
+    }
+}
+
+module.exports = {registrateUser, login, logout, getCurrentUser, updateSubscription, updateUserAvatar}
