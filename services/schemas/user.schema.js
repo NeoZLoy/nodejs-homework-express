@@ -23,7 +23,16 @@ const user = new Schema({
     },
     avatarUrl: {
       type: String,
-    }
+    },
+    verificationToken: {
+      type: String,
+      default: null,
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+
   })
 
   const User = mongoose.model('user', user);
