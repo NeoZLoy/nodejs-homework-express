@@ -1,11 +1,13 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto')
-
+const crypto = require('crypto');
+const nodemailer = require('nodemailer')
+const uuid = require('uuid').v4;
 
 const { createUserValidation } = require("../helpers/user.validator");
-const { createUser, findByEmail, findUserById, findUserByToken  } = require("../services");
+const { createUser, findByEmail, findUserById, findUserByToken, findUserByVerificationToken  } = require("../services");
 const { hashPwd } = require('../helpers/user.hash');
+const {config} = require('../helpers/email.config')
 
 const registrateUser = async (req, res, next) => {
     try {
@@ -24,7 +26,23 @@ const registrateUser = async (req, res, next) => {
         const hashedPassword = await hashPwd(req.body.password)
 
         // creating new user
-        const result = await createUser({...value, password: hashedPassword, avatar: avatarUrl});
+        const result = await createUser({...value, password: hashedPassword, avatar: avatarUrl, verificationToken: uuid(), verify: false });
+
+        // send list to verify email
+
+        const transporter = nodemailer.createTransport(config);
+
+        const emailOptions = {
+            from: 'fidd.michael@gmail.com',
+            to: `${result.email}`,
+            subject: 'Email verify',
+            text: `Hello. You need to verify Your email! Link: /users/verify/${result.verificationToken}`,
+        };
+
+        transporter
+            .sendMail(emailOptions)
+            .then(info => console.log(info))
+            .catch(err => console.log(err));
 
 
         return res.status(201).json({
@@ -34,6 +52,19 @@ const registrateUser = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+}
+
+const verifyUserEmail = async (req, res, next) => {
+   try {
+        req.user.verify = true;
+        req.user.verificationToken = null;
+        await req.user.save();
+        res.status(200).json({
+            msg: 'Verification successful'
+        })
+   } catch (error) {
+    next(error)
+   }
 }
 
 const login = async (req, res, next) => {
@@ -147,4 +178,39 @@ const updateUserAvatar = async(req, res, next) => {
     }
 }
 
-module.exports = {registrateUser, login, logout, getCurrentUser, updateSubscription, updateUserAvatar}
+const sendVerificationMessage = async(req, res, next) => {
+    try {
+        const transporter = nodemailer.createTransport(config);
+
+        const emailOptions = {
+            from: 'fidd.michael@gmail.com',
+            to: `${req.user.email}`,
+            subject: 'Email verify',
+            text: `Hello. You need to verify Your email! Link: /users/verify/:${req.user.verificationToken}`,
+        };
+
+        transporter
+            .sendMail(emailOptions)
+            .then(info => console.log(info))
+            .catch(err => console.log(err));
+
+        return res.status(200).json({
+            msg: 'Confirmation link has been sent'
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+module.exports = {
+    registrateUser, 
+    login, 
+    logout, 
+    getCurrentUser, 
+    updateSubscription, 
+    updateUserAvatar, 
+    verifyUserEmail, 
+    sendVerificationMessage
+}
