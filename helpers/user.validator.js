@@ -17,7 +17,6 @@ const loginUserValidation = (userData) => {
     .object()
     .keys({
         email:Joi.string().email(({ minDomainSegments: 1, tlds: { allow: ['com', 'net', 'ua'] } })).required(),
-        verify:Joi.boolean().required()
     }).options({
         abortEarly: false,
     }).validate(userData)
