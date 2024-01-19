@@ -44,7 +44,7 @@ const getFavoriteContacts = async() => {
     return await User.create(userData)
   }
 
-  const findByEmail = async (userData) => {
+  const findUserByEmail = async (userData) => {
     return await User.findOne({email:userData})
   }
 
@@ -54,6 +54,10 @@ const getFavoriteContacts = async() => {
 
   const findUserByToken = async (userData) => {
     return await User.findOne({token: userData})
+  }
+
+  const findUserByVerificationToken = async(userData) => {
+    return await User.findOne({verificationToken: userData})
   }
   
 
@@ -67,7 +71,8 @@ const getFavoriteContacts = async() => {
     removeContact, 
     getUsers, 
     createUser, 
-    findByEmail, 
+    findUserByEmail, 
     findUserById,
     findUserByToken,
+    findUserByVerificationToken
   }

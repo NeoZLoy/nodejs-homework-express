@@ -5,8 +5,7 @@ const jimp = require("jimp");
 const path = require('path')
 
 
-const {getUsers } = require('../services');
-const { findUserById } = require('../services');
+const {getUsers, findUserByEmail, findUserById, findUserByVerificationToken} = require('../services');
 
 
 const checkUniqueEmail = async (req, res, next) => {
@@ -70,6 +69,7 @@ const checkToken = async (req, res, next) => {
     }
 }
 
+
 // Multer Storage
 
 const multerStorage = multer.memoryStorage()
@@ -121,4 +121,70 @@ const saveUserAvatar = async (req, res, next) => {
     }
 
 }
-module.exports = {checkUniqueEmail, checkToken, uploadUserAvatar, resizeUserAvatar, saveUserAvatar};
+
+const verifyTokenChecker = async (req, res, next) => {
+    try {
+        const user = await findUserByVerificationToken(req.params.verificationToken);
+        if (!user){
+            res.status(404).json({
+                msg: 'User not found'
+            })
+        }
+        req.user = user;
+        next()
+        
+    } catch (error) {
+        next(error)
+    }
+}
+
+const IsEmailVerifyed = (req, res, next) => {
+
+    const user = req.user;
+
+    if(user.verify === false){
+        res.status(400).json({
+            msg: 'Please, confirm You email.'
+        })
+    } else {
+        next()
+    }
+ }
+
+ const isEmailEntered = async (req, res, next) => {
+    if(!req.body.email){
+        res.status(400).json({
+            msg: 'Missing required field email'
+        })
+    } else{
+        req.user = await findUserByEmail(req.body.email) 
+        if(!req.user){
+            res.status(404).json({
+                msg: 'User not found'
+            })
+        }
+        next()
+    }
+ }
+
+ const isUserVerifyed = (req, res, next) => {
+    if(req.user.verify === true){
+        res.status(400).json({
+            msg: 'Verification has already been passed'
+        }) 
+    }else {
+        next()
+    }
+ }
+
+module.exports = {
+    checkUniqueEmail, 
+    checkToken, 
+    uploadUserAvatar, 
+    resizeUserAvatar, 
+    saveUserAvatar, 
+    verifyTokenChecker, 
+    IsEmailVerifyed,
+    isEmailEntered,
+    isUserVerifyed,
+};
